@@ -1,0 +1,78 @@
+package com.example.listycity;
+
+import android.os.Bundle;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.Toast;
+
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
+public class MainActivity extends AppCompatActivity implements AddCityFragment.AddCityDialogListener {
+
+    private ArrayList<City> dataList;
+    private ListView cityList;
+    private CityArrayAdapter cityAdapter;
+
+    @Override
+    public void addCity(City city) {
+        dataList.add(city);
+        cityAdapter.notifyDataSetChanged();
+    }
+
+    public void editCity(City city, int position) {
+        if (position >= 0 && position < dataList.size()) {
+            dataList.set(position, city);
+            cityAdapter.notifyDataSetChanged();
+        }
+        else {
+            dataList.add(city);
+            cityAdapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        String[] cities = {"Edmonton", "Vancouver", "Toronto"};
+        String[] provinces = {"AB", "BC", "ON"};
+
+        dataList = new ArrayList<City>();
+        for (int i = 0; i < cities.length; i++) {
+            dataList.add(new City(cities[i], provinces[i]));
+        }
+
+        cityList = findViewById(R.id.city_list);
+        cityAdapter = new CityArrayAdapter(this, dataList);
+        cityList.setAdapter(cityAdapter);
+
+        FloatingActionButton fab = findViewById(R.id.button_add_city);
+        fab.setOnClickListener(v -> {
+            new AddCityFragment().show(getSupportFragmentManager(), "Add City");
+        });
+        cityList.setOnItemClickListener((parent, view, position, id) -> {
+            City poistion = dataList.get(position);
+
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("city", poistion);
+            bundle.putInt("position", position);
+
+            AddCityFragment new_frag = new AddCityFragment();
+            new_frag.setArguments(bundle);
+            new_frag.show(getSupportFragmentManager(), "Edit City");
+        });
+    }
+}
